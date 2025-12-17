@@ -1,0 +1,261 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.image import Image
+from kivy.uix.carousel import Carousel
+from kivy.graphics import Color, RoundedRectangle, Rectangle
+from kivy.core.window import Window
+from kivy.clock import Clock
+from PIL import Image as PILImage
+from kivy.core.audio import SoundLoader
+import os
+import tempfile
+
+# --- Custom UI Components ---
+
+class RoundedButton(Button):
+    def __init__(self, **kwargs):
+        super(RoundedButton, self).__init__(**kwargs)
+        self.background_normal = ''
+        self.background_color = (0, 0, 0, 0) 
+        self.color = (1, 1, 1, 1)
+        self.bind(pos=self.update_canvas, size=self.update_canvas)
+
+    def update_canvas(self, *args):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            # Soft Blue/Slate color
+            Color(rgba=(0.21, 0.35, 0.45, 1) if self.state == 'normal' else (0.15, 0.25, 0.35, 1))
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[15,])
+            
+
+# --- Main App ---
+
+class BirthdayApp(App):
+    def build(self):
+        Window.size = (900, 600)
+        self.main_layout = BoxLayout(orientation='vertical', padding=50, spacing=20)
+        
+        with self.main_layout.canvas.before:
+            Color(0.98, 0.85, 0.82, 1) 
+            self.rect = Rectangle(source='bg.png', size=Window.size, pos=self.main_layout.pos)
+        self.main_layout.bind(size=self._update_rect, pos=self._update_rect)
+
+        # --- Music Initialization ---
+        # Replace 'our_song.mp3' with your actual filename
+        self.sound = SoundLoader.load('song.mp3')
+        if self.sound:
+            self.sound.loop = True  # Set to True for background looping
+            self.sound.play()
+        
+        # Mute/Unmute Button in top corner
+        self.mute_btn = Button(
+            text="🔊", # Starts as Unmuted
+            size_hint=(None, None), size=(50, 50),
+            pos_hint={'right': 1, 'top': 1},
+            background_normal='', background_color=(0, 0, 0, 0.3)
+        )
+        self.mute_btn.bind(on_press=self.toggle_mute)
+        self.main_layout.add_widget(self.mute_btn)
+
+        # Main Page Title
+        title_label = Label(
+            text="Happy New Year, Malavika Sweetheart! 🎉",
+            font_size='28sp', bold=True, color=(0, 1, 1, 1)
+        )
+        self.main_layout.add_widget(title_label)
+
+        # Main Page Static Message
+        static_msg = Label(
+            text="This tiny program is a little placeholder,\nfor the endless love and joy you bring to my life.",
+            font_size='16sp', italic=True, color=(1, 1, 1, 1), halign='center'
+        )
+        self.main_layout.add_widget(static_msg)
+
+        # Buttons
+        button_frame = BoxLayout(orientation='horizontal', spacing=20, size_hint=(0.7, None), height=60, pos_hint={'center_x': 0.5})
+        
+        btn1 = RoundedButton(text="Click for a Special Surprise!", font_size='13sp', bold=True)
+        btn1.bind(on_press=self.show_special_message)
+        
+        btn2 = RoundedButton(text="Trip down the memory lane", font_size='13sp', bold=True)
+        btn2.bind(on_press=self.show_gallery)
+
+        button_frame.add_widget(btn1)
+        button_frame.add_widget(btn2)
+        self.main_layout.add_widget(button_frame)
+
+        return self.main_layout
+
+    def _update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
+
+    def show_special_message(self, instance):
+        popup_layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
+        
+        # The message that will be "typed"
+        self.popup_full_text = (
+            "My love for you grows more every day!\n"
+            "Every time I look at you smiling, I fall in love all over again.\n\n"
+            "You're the best gift in my life. ❤️\n"
+            "Since the day we met, my life has been filled with joy.\n"
+            "I want to spend every New Year making you happy.\n\n"
+            "Happy New Year, My Love!"
+        )
+        
+        self.popup_label = Label(
+            text="", # Starts empty
+            font_size='16sp',
+            italic=True,
+            halign='center',
+            color=(1, 1, 1, 1),
+            valign='middle'
+        )
+        # Ensure text wraps correctly within the popup
+        self.popup_label.bind(size=lambda s, v: setattr(self.popup_label, 'text_size', (s.width, None)))
+        
+        popup_layout.add_widget(self.popup_label)
+
+        ok_button = RoundedButton(text="I love you!", size_hint=(0.5, None), height=50, pos_hint={'center_x': 0.5})
+        popup_layout.add_widget(ok_button)
+
+        self.special_popup = Popup(
+            title='A Message From My Heart',
+            content=popup_layout,
+            size_hint=(0.85, 0.7),
+            background_color=[0.75, 0.22, 0.17, 0.9] # Deep red theme for the love note
+        )
+
+        # Reset typing variables and start clock
+        self.popup_char_index = 0
+        Clock.schedule_interval(self.type_popup_text, 0.04) # Slightly faster typing for longer messages
+
+        ok_button.bind(on_press=self.special_popup.dismiss)
+        self.special_popup.open()
+
+    def type_popup_text(self, dt):
+        if self.popup_char_index < len(self.popup_full_text):
+            self.popup_label.text += self.popup_full_text[self.popup_char_index]
+            self.popup_char_index += 1
+            return True # Continue calling
+        else:
+            return False # Stop the clock when done
+
+    def show_gallery(self, instance):
+        print("show_gallery called")
+        gallery_layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+
+        # Use the app directory so this works when packaged into an APK
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        image_dir = app_dir
+        print(f"Image directory: {image_dir}")
+        # Exclude background and audio files; include common image extensions
+        image_files = [f for f in os.listdir(image_dir)
+                       if f.lower().endswith(('.jpg', '.png', '.gif', '.jpeg'))
+                       and f.lower() != 'bg.png' and f.lower() != 'song.mp3']
+        print(f"Found image files: {image_files}")
+
+        if not image_files:
+            print("No image files found. Showing error popup.")
+            popup = Popup(title='Error', content=Label(text='No images found in the directory.'), size_hint=(0.7, 0.3))
+            popup.open()
+            return
+
+        carousel = Carousel(direction='right', loop=True)
+        
+        # List to keep references to loaded image sources for cleanup
+        loaded_image_sources = []
+
+        for image_file in image_files:
+            try:
+                print(f"Attempting to load: {image_file}")
+                img_path = os.path.join(image_dir, image_file)
+                
+                # Use PIL to preprocess (rotate and resize) before Kivy loads
+                pil_img = PILImage.open(img_path)
+                # if pil_img.width > pil_img.height:
+                #     pil_img = pil_img.rotate(-90, expand=True)
+                
+                # Resize to fit within common display area for carousel
+                pil_img.thumbnail((500, 500), PILImage.Resampling.LANCZOS)
+                
+                # Save to a temporary file (system temp dir is writable on Android)
+                temp_filename = f"temp_kivy_gallery_{os.path.basename(image_file)}"
+                temp_path = os.path.join(tempfile.gettempdir(), temp_filename)
+                pil_img.save(temp_path)
+                loaded_image_sources.append(temp_path)
+
+                img_widget = Image(source=temp_path, fit_mode='contain')
+                carousel.add_widget(img_widget)
+                print(f"Successfully loaded: {image_file}")
+            except Exception as e:
+                print(f"Error loading image {image_file}: {e}")
+
+        if not carousel.slides:
+            print("No images loaded into carousel. Showing error popup.")
+            popup = Popup(title='Error', content=Label(text='Could not load any images.'), size_hint=(0.7, 0.3))
+            popup.open()
+            return
+
+        gallery_layout.add_widget(carousel)
+
+        # Navigation and Close buttons
+        nav_close_layout = BoxLayout(size_hint_y=None, height=50, spacing=10)
+        
+        prev_button = Button(text='< Prev', size_hint_x=0.2)
+        prev_button.bind(on_press=lambda x: carousel.load_previous())
+        nav_close_layout.add_widget(prev_button)
+
+        close_button = Button(text='Close', size_hint_x=0.6)
+        nav_close_layout.add_widget(close_button)
+
+        next_button = Button(text='Next >', size_hint_x=0.2)
+        next_button.bind(on_press=lambda x: carousel.load_next())
+        nav_close_layout.add_widget(next_button)
+
+        gallery_layout.add_widget(nav_close_layout)
+
+        gallery_popup = Popup(
+            title='Memory Lane',
+            content=gallery_layout,
+            size_hint=(0.9, 0.9),
+            background_color=[0.98, 0.85, 0.82, 1], # Light pink background
+            separator_color=[0.75, 0.22, 0.17, 1] # Deep red separator
+        )
+
+        def dismiss_gallery_popup(instance):
+            print("Dismissing gallery popup. Attempting to release resources and cleanup temp files.")
+            for temp_file in loaded_image_sources:
+                if os.path.exists(temp_file): # Check if the file still exists before trying to remove
+                    try:
+                        os.remove(temp_file)
+                        print(f"Cleaned up temporary file: {temp_file}")
+                    except Exception as e:
+                        print(f"Error cleaning up {temp_file}: {e}")
+            gallery_popup.dismiss()
+            print("Gallery popup dismissed and resources released.")
+
+        close_button.bind(on_press=dismiss_gallery_popup)
+        gallery_popup.open()
+        print("Gallery popup opened.")
+
+    def toggle_mute(self, instance):
+        if self.sound:
+            # If volume is greater than 0, mute it
+            if self.sound.volume > 0.05: 
+                self.sound.volume = 0 # Mute
+                self.mute_btn.text = "🔇"
+            else:
+                # Set volume back to 1.0 (100%)
+                self.sound.volume = 1.0 
+                self.mute_btn.text = "🔊"
+                
+                # Safety check: if sound stopped for some reason, restart it
+                if self.sound.state == 'stop':
+                    self.sound.play()
+
+if __name__ == '__main__':
+    BirthdayApp().run()
