@@ -1,4 +1,4 @@
-# Build an APK for `BirthdayApp`
+# Build an APK
 
 This workspace contains `main_kivy.py` (the Kivy app) and media assets (images and `song.mp3`).
 
