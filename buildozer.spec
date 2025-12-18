@@ -30,6 +30,9 @@ fullscreen = 0
 # (list) Permissions
 android.permissions = INTERNET
 
+# (bool) Accept SDK license agreements automatically
+android.accept_sdk_license = True
+
 # (list) List of architectures to build for
 android.archs = arm64-v8a, armeabi-v7a
 
