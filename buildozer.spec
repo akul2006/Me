@@ -37,4 +37,4 @@ android.accept_sdk_license = True
 android.archs = arm64-v8a, armeabi-v7a
 
 # (str) Bootstrap to use for android builds
-p4a.branch = master
+# p4a.branch = master
