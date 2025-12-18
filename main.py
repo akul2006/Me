@@ -33,7 +33,7 @@ class RoundedButton(Button):
 
 # --- Main App ---
 
-class BirthdayApp(App):
+class NewYear2026(App):
     def build(self):
         Window.size = (900, 600)
         self.main_layout = BoxLayout(orientation='vertical', padding=50, spacing=20)
@@ -44,21 +44,44 @@ class BirthdayApp(App):
         self.main_layout.bind(size=self._update_rect, pos=self._update_rect)
 
         # --- Music Initialization ---
-        # Replace 'our_song.mp3' with your actual filename
-        self.sound = SoundLoader.load('song.mp3')
-        if self.sound:
-            self.sound.loop = True  # Set to True for background looping
-            self.sound.play()
+        # Blueprint to add more songs: Add your filenames to this list
+        # e.g. self.songs = ['song.mp3', 'song2.mp3', 'song3.mp3']
+        self.songs = ['song1.mp3', 'song2.mp3', 'song3.mp3', 'song4.mp3', 'song5.mp3', 'song6.mp3', 'song7.mp3'] 
+        self.current_song_index = 0
+        self.sound = None
         
-        # Mute/Unmute Button in top corner
+        # Music Controls Layout (Top Right)
+        controls_layout = BoxLayout(
+            orientation='vertical', 
+            size_hint=(None, None), 
+            size=(50, 160), # Height for 3 buttons + spacing
+            pos_hint={'right': 1, 'top': 1},
+            spacing=5
+        )
+
+        # Mute/Unmute Button
         self.mute_btn = Button(
             text="🔊", # Starts as Unmuted
             size_hint=(None, None), size=(50, 50),
-            pos_hint={'right': 1, 'top': 1},
             background_normal='', background_color=(0, 0, 0, 0.3)
         )
         self.mute_btn.bind(on_press=self.toggle_mute)
-        self.main_layout.add_widget(self.mute_btn)
+        
+        # Next/Prev Buttons
+        self.next_btn = Button(text="⏭️", size_hint=(None, None), size=(50, 50), background_normal='', background_color=(0, 0, 0, 0.3))
+        self.next_btn.bind(on_press=self.next_song)
+        
+        self.prev_btn = Button(text="⏮️", size_hint=(None, None), size=(50, 50), background_normal='', background_color=(0, 0, 0, 0.3))
+        self.prev_btn.bind(on_press=self.prev_song)
+
+        controls_layout.add_widget(self.mute_btn)
+        controls_layout.add_widget(self.next_btn)
+        controls_layout.add_widget(self.prev_btn)
+        
+        self.main_layout.add_widget(controls_layout)
+        
+        # Start playing
+        self.load_song(self.current_song_index)
 
         # Main Page Title
         title_label = Label(
@@ -242,6 +265,31 @@ class BirthdayApp(App):
         gallery_popup.open()
         print("Gallery popup opened.")
 
+    def load_song(self, index):
+        if self.sound:
+            self.sound.stop()
+            self.sound.unload()
+        
+        if not self.songs: return
+
+        try:
+            self.sound = SoundLoader.load(self.songs[index])
+            if self.sound:
+                self.sound.loop = True
+                # Check mute state
+                self.sound.volume = 0 if self.mute_btn.text == "🔇" else 1.0
+                self.sound.play()
+        except Exception as e:
+            print(f"Error loading song: {e}")
+
+    def next_song(self, instance):
+        self.current_song_index = (self.current_song_index + 1) % len(self.songs)
+        self.load_song(self.current_song_index)
+
+    def prev_song(self, instance):
+        self.current_song_index = (self.current_song_index - 1) % len(self.songs)
+        self.load_song(self.current_song_index)
+
     def toggle_mute(self, instance):
         if self.sound:
             # If volume is greater than 0, mute it
@@ -258,4 +306,4 @@ class BirthdayApp(App):
                     self.sound.play()
 
 if __name__ == '__main__':
-    BirthdayApp().run()
+    NewYear2026().run()

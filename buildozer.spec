@@ -1,9 +1,9 @@
 [app]
 # (str) Title of your application
-title = Birthday App
+title = New Year 2026
 
 # (str) Package name
-package.name = birthdayapp
+package.name = newyear2026
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.jerry
