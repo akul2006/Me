@@ -209,7 +209,7 @@ class BirthdayApp(App):
         prev_button.bind(on_press=lambda x: carousel.load_previous())
         nav_close_layout.add_widget(prev_button)
 
-        close_button = Button(text='Close', size_hint_x=0.6)
+        close_button = Button(text='Many more to come...', size_hint_x=0.6)
         nav_close_layout.add_widget(close_button)
 
         next_button = Button(text='Next >', size_hint_x=0.2)
