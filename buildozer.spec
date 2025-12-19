@@ -12,7 +12,7 @@ package.domain = org.jerry
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,jpeg,gif,mp3
+source.include_exts = py,png,jpg,jpeg,gif,mp3,kv
 
 # (str) Application versioning (method 1)
 version = 1.0

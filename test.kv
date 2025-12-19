@@ -1,0 +1,91 @@
+#:kivy 1.0.9
+
+<RoundedButton>:
+    background_normal: ''
+    background_color: 0, 0, 0, 0
+    color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: (0.21, 0.35, 0.45, 1) if self.state == 'normal' else (0.15, 0.25, 0.35, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15,]
+
+<MainLayout>:
+    orientation: 'vertical'
+    padding: 50
+    spacing: 20
+    canvas.before:
+        Color:
+            rgba: 0.98, 0.85, 0.82, 1
+        Rectangle:
+            source: 'bg.png'
+            size: self.size
+            pos: self.pos
+
+    BoxLayout:
+        # Music Controls Layout (Top Right)
+        orientation: 'vertical'
+        size_hint: None, None
+        size: 50, 160
+        pos_hint: {'right': 1, 'top': 1}
+        spacing: 5
+
+        Button:
+            id: mute_btn
+            text: "🔊"
+            size_hint: None, None
+            size: 50, 50
+            background_normal: ''
+            background_color: 0, 0, 0, 0.3
+            on_press: app.toggle_mute(self)
+
+        Button:
+            text: "⏭️"
+            size_hint: None, None
+            size: 50, 50
+            background_normal: ''
+            background_color: 0, 0, 0, 0.3
+            on_press: app.next_song(self)
+
+        Button:
+            text: "⏮️"
+            size_hint: None, None
+            size: 50, 50
+            background_normal: ''
+            background_color: 0, 0, 0, 0.3
+            on_press: app.prev_song(self)
+
+    Label:
+        text: "Happy New Year, Malavika Sweetheart! 🎉"
+        font_size: '28sp'
+        bold: True
+        color: 0, 1, 1, 1
+
+    Label:
+        text: "This tiny program is a little placeholder,\nfor the endless love and joy you bring to my life."
+        font_size: '16sp'
+        italic: True
+        color: 1, 1, 1, 1
+        halign: 'center'
+
+    BoxLayout:
+        # Buttons Frame
+        orientation: 'horizontal'
+        spacing: 20
+        size_hint: 0.7, None
+        height: 60
+        pos_hint: {'center_x': 0.5}
+
+        RoundedButton:
+            text: "Click for a Special Surprise!"
+            font_size: '13sp'
+            bold: True
+            on_press: app.show_special_message(self)
+
+        RoundedButton:
+            text: "Trip down the memory lane"
+            font_size: '13sp'
+            bold: True
+            on_press: app.show_gallery(self)
