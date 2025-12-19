@@ -12,7 +12,7 @@ package.domain = org.jerry
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,jpeg,gif,mp3,kv
+source.include_exts = py,png,jpg,jpeg,gif,mp3,kv,JPG,JPEG,PNG
 
 # (str) Application versioning (method 1)
 version = 1.0
@@ -37,4 +37,4 @@ android.accept_sdk_license = True
 android.archs = arm64-v8a, armeabi-v7a
 
 # (str) Bootstrap to use for android builds
-p4a.branch = master
+# p4a.branch = master
