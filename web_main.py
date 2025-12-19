@@ -173,4 +173,4 @@ def main(page: ft.Page):
 
 # Run the app
 # assets_dir="." allows the app to find your images and mp3s in the current folder
-ft.app(target=main, assets_dir=".", view=ft.AppView.WEB_BROWSER)
+ft.app(target=main, assets_dir=".", view=ft.AppView.WEB_BROWSER, port=int(os.getenv("PORT", 8000)), host="0.0.0.0")
